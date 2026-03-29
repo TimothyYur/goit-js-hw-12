@@ -16,7 +16,6 @@ let query = '';
 let page = 1;
 let totalHits = 0;
 
-// Спочатку ховаємо кнопку
 hideLoadMoreButton();
 
 form.addEventListener('submit', async event => {
@@ -28,7 +27,7 @@ form.addEventListener('submit', async event => {
     return;
   }
 
-  page = 1; // Скидаємо сторінку для нового пошуку
+  page = 1;
   clearGallery();
   hideLoadMoreButton();
   showLoader();
@@ -54,13 +53,12 @@ form.addEventListener('submit', async event => {
 loadMoreBtn.addEventListener('click', async () => {
   page += 1;
   showLoader();
-  hideLoadMoreButton(); // Ховаємо на час завантаження
+  hideLoadMoreButton();
 
   try {
     const data = await getImagesByQuery(query, page);
     createGallery(data.hits);
     
-    // Плавний скрол
     smoothScroll();
     
     checkLoadMoreStatus();
