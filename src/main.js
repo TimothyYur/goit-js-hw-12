@@ -20,7 +20,7 @@ const perPage = 15;
 form.addEventListener('submit', async event => {
   event.preventDefault();
 
-  const query = form.elements['search-text'].value.trim();
+  query = form.elements['search-text'].value.trim();
 
   if (!query) {
     showMessage('Please enter a search query.');
@@ -36,17 +36,22 @@ form.addEventListener('submit', async event => {
   try {
     const data = await getImagesByQuery(query, page);
     totalHits = data.totalHits;
+    if (totalHits === 0) {
+      showMessage(
+        'Sorry, there are no images matching your search query. Please try again!'
+      );
+      return;
+    }
+
     createGallery(data.hits);
-    checkLoadMoreStatus();
+    checkPaginationStatus();
   } catch (error) {
-    showMessage('An error occurred while fetching images. Please try again.');
+    showMessage('An error occurred while fetching images.');
     console.error(error);
   } finally {
     hideLoader();
     form.reset();
   }
-
-  form.reset();
 });
 
 loadmore.addEventListener('click', async () => {
@@ -70,18 +75,11 @@ loadmore.addEventListener('click', async () => {
 
 function checkPaginationStatus() {
   const maxPage = Math.ceil(totalHits / perPage);
-  if (page >= maxPage) {
-    hideLoadmore();
-    showMessage("We're sorry, but you've reached the end of search results.");
-  } else {
-    showLoadmore();
-  }
-}
 
-function checkLoadMoreStatus() {
-  const maxPage = Math.ceil(totalHits / 15);
   if (page >= maxPage) {
     hideLoadmore();
+    // Повідомлення про кінець колекції показуємо тільки якщо ми щось знайшли (totalHits > 0)
+    // і ми вже довантажили останню сторінку.
     if (totalHits > 0) {
       showMessage("We're sorry, but you've reached the end of search results.");
     }
