@@ -1,18 +1,19 @@
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
-import SimpleLightbox from 'simplelightbox';
+// Додатковий імпорт стилів
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const gallery = document.querySelector('.gallery');
-const loader = document.querySelector('.loader');
-const loadMoreBtn = document.querySelector('#loadmore-button');
-
-const lightbox = new SimpleLightbox('.gallery a', {
-  captionsData: 'alt',
-  captionDelay: 250,
-});
+let lightbox;
 
 export function createGallery(images) {
+  if (images.length === 0) {
+    showMessage(
+      'Sorry, there are no images matching your search query. Please try again!'
+    );
+    return;
+  }
+
   const markup = images
     .map(
       image => `
@@ -21,10 +22,10 @@ export function createGallery(images) {
           <img src="${image.webformatURL}" alt="${image.tags}" class="gallery-image" />
         </a>
         <div class="image-info">
-          <p><span>Likes</span>${image.likes}</p>
-          <p><span>Views</span>${image.views}</p>
-          <p><span>Comments</span>${image.comments}</p>
-          <p><span>Downloads</span>${image.downloads}</p>
+          <p>Likes: ${image.likes}</p>
+          <p>Views: ${image.views}</p>
+          <p>Comments: ${image.comments}</p>
+          <p>Downloads: ${image.downloads}</p>
         </div>
       </li>
     `
@@ -32,11 +33,20 @@ export function createGallery(images) {
     .join('');
 
   gallery.insertAdjacentHTML('beforeend', markup);
-  lightbox.refresh();
+
+  if (lightbox) {
+    lightbox.refresh();
+  } else {
+    lightbox = new window.SimpleLightbox('.gallery a', {
+      captionsData: 'alt',
+      captionDelay: 250,
+    });
+  }
 }
 
 export function showMessage(message) {
   iziToast.info({
+    title: 'Info',
     message: message,
     position: 'topRight',
   });
@@ -47,17 +57,21 @@ export function clearGallery() {
 }
 
 export function showLoader() {
+  const loader = document.querySelector('.loader');
   loader.style.display = 'block';
 }
 
 export function hideLoader() {
+  const loader = document.querySelector('.loader');
   loader.style.display = 'none';
 }
 
-export function showLoadMoreButton() {
-  loadMoreBtn.style.display = 'block';
+export function showLoadmore() {
+  const loadmore = document.querySelector(".loadmore")
+  loadmore.style.display = "block"
 }
 
-export function hideLoadMoreButton() {
-  loadMoreBtn.style.display = 'none';
+export function hideLoadmore() {
+  const loadmore = document.querySelector(".loadmore")
+  loadmore.style.display = "none"
 }

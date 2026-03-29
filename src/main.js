@@ -5,23 +5,23 @@ import {
   clearGallery,
   showLoader,
   hideLoader,
-  showLoadMoreButton,
-  hideLoadMoreButton,
+  showLoadmore,
+  hideLoadmore,
 } from './js/render-functions.js';
 
 const form = document.querySelector('.form');
-const loadMoreBtn = document.querySelector('#loadmore-button');
+const loadmore = document.querySelector('.loadmore');
 
 let query = '';
 let page = 1;
 let totalHits = 0;
-
-hideLoadMoreButton();
+const perPage = 15;
 
 form.addEventListener('submit', async event => {
   event.preventDefault();
 
-  query = form.elements['search-text'].value.trim();
+  const query = form.elements['search-text'].value.trim();
+
   if (!query) {
     showMessage('Please enter a search query.');
     return;
@@ -29,56 +29,64 @@ form.addEventListener('submit', async event => {
 
   page = 1;
   clearGallery();
-  hideLoadMoreButton();
+  hideLoader();
+  hideLoadmore();
   showLoader();
 
   try {
     const data = await getImagesByQuery(query, page);
     totalHits = data.totalHits;
-
-    if (data.hits.length === 0) {
-      showMessage('Sorry, there are no images matching your search query.');
-    } else {
-      createGallery(data.hits);
-      checkLoadMoreStatus();
-    }
+    createGallery(data.hits);
+    checkLoadMoreStatus();
   } catch (error) {
-    showMessage('Something went wrong. Please try again later.');
+    showMessage('An error occurred while fetching images. Please try again.');
+    console.error(error);
   } finally {
     hideLoader();
     form.reset();
   }
+
+  form.reset();
 });
 
-loadMoreBtn.addEventListener('click', async () => {
+loadmore.addEventListener('click', async () => {
   page += 1;
   showLoader();
-  hideLoadMoreButton();
+  hideLoadmore();
 
   try {
     const data = await getImagesByQuery(query, page);
+
     createGallery(data.hits);
-    
     smoothScroll();
-    
-    checkLoadMoreStatus();
+    checkPaginationStatus();
   } catch (error) {
-    showMessage('Error loading more images.');
+    showMessage('An error occurred while loading more images.');
+    console.error(error);
   } finally {
     hideLoader();
   }
 });
 
+function checkPaginationStatus() {
+  const maxPage = Math.ceil(totalHits / perPage);
+  if (page >= maxPage) {
+    hideLoadmore();
+    showMessage("We're sorry, but you've reached the end of search results.");
+  } else {
+    showLoadmore();
+  }
+}
+
 function checkLoadMoreStatus() {
-  const totalPages = Math.ceil(totalHits / 15);
-  
-  if (page >= totalPages) {
-    hideLoadMoreButton();
+  const maxPage = Math.ceil(totalHits / 15);
+  if (page >= maxPage) {
+    hideLoadmore();
     if (totalHits > 0) {
-        showMessage("We're sorry, but you've reached the end of search results.");
+      showMessage("We're sorry, but you've reached the end of search results.");
     }
   } else {
-    showLoadMoreButton();
+    showLoadmore();
   }
 }
 
