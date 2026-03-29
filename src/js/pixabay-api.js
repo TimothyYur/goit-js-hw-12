@@ -10,11 +10,10 @@ export async function getImagesByQuery(query, page = 1) {
     image_type: 'photo',
     orientation: 'horizontal',
     safesearch: true,
-    per_page: 15, // Вимога: 15 об'єктів
+    per_page: 15,
     page: page,
   };
 
   const response = await axios.get(BASE_URL, { params });
-  // Повертаємо весь об'єкт data, щоб у main.js мати доступ до totalHits
   return response.data;
 }
